@@ -1,9 +1,14 @@
 package com.example.myapplication;
 
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceContour;
@@ -38,6 +43,7 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
     private final Paint[] labelPaints;
 
     private volatile Face face;
+    Bitmap bitmap;
 
     FaceGraphic(GraphicOverlay overlay, Face face) {
         super(overlay);
@@ -66,11 +72,15 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
             labelPaints[i].setColor(COLORS[i][1] /* background color */);
             labelPaints[i].setStyle(Paint.Style.FILL);
         }
+
+         bitmap = Bitmap.createBitmap(500/*width*/, 500/*height*/, Bitmap.Config.ARGB_8888);
     }
 
     /** Draws the face annotations for position on the supplied canvas. */
     @Override
     public void draw(Canvas canvas) {
+      //  canvas.setBitmap(bitmap);
+
         Face face = this.face;
         if (face == null) {
             return;
@@ -79,7 +89,8 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
         // Draws a circle at the position of the detected face, with the face's track id below.
         float x = translateX(face.getBoundingBox().centerX());
         float y = translateY(face.getBoundingBox().centerY());
-        canvas.drawCircle(x, y, FACE_POSITION_RADIUS, facePositionPaint);
+       // canvas.drawCircle(x, y, FACE_POSITION_RADIUS, facePositionPaint);
+      //  canvas.drawRect();
 
         // Calculate positions.
         float left = x - scale(face.getBoundingBox().width() / 2.0f);
@@ -145,11 +156,12 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                 top,
                 labelPaints[colorID]);
         yLabelOffset += ID_TEXT_SIZE;
-        canvas.drawRect(left, top, right, bottom, boxPaints[colorID]);
+       canvas.drawRect(left, top, right, bottom, boxPaints[colorID]);
         if (face.getTrackingId() != null) {
             canvas.drawText("ID: " + face.getTrackingId(), left, top + yLabelOffset, idPaints[colorID]);
             yLabelOffset += lineHeight;
         }
+
 
         // Draws all face contours.
         for (FaceContour contour : face.getAllContours()) {
@@ -158,6 +170,37 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                         translateX(point.x), translateY(point.y), FACE_POSITION_RADIUS, facePositionPaint);
             }
         }
+
+
+        if(face.getAllLandmarks() != null) {
+            float cheek1Left = translateX(face.getLandmark(FaceLandmark.LEFT_EAR).getPosition().x);
+            float cheek1Right = translateX(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().x);
+            float cheek1Top = translateY(face.getLandmark(FaceLandmark.LEFT_EYE).getPosition().y);
+            float cheek1Bottom = translateY(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().y);
+
+            float cheek2Left = translateX(face.getLandmark(FaceLandmark.RIGHT_EAR).getPosition().x);
+            float cheek2Right = translateX(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().x);
+            float cheek2Top = translateY(face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition().y);
+            float cheek2Bottom = translateY(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().y);
+
+
+
+            canvas.drawRect(cheek1Left, cheek1Top + 50, cheek1Right + 60,
+                    cheek1Bottom, boxPaints[1]);
+
+            canvas.drawRect(cheek2Left -20  , cheek2Top + 50 , cheek2Right - 60 ,
+                    cheek2Bottom, boxPaints[1]);
+
+            // canvas.drawRect(cheekLeft -20f, cheekTop -50f, cheekRight+20f, cheekBottom + 50f, boxPaints[colorID]);
+            Log.d("face.getAllContours()", face.getAllContours().toString());
+
+            Log.d("face.getAllLandmarks()", face.getAllLandmarks().toString());
+
+            Log.d("face.getBoundingBox()", face.getBoundingBox().toString());
+
+        }
+
+
 
         // Draws smiling and left/right eye open probabilities.
         if (face.getSmilingProbability() != null) {
@@ -169,55 +212,55 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
             yLabelOffset += lineHeight;
         }
 
-        FaceLandmark leftEye = face.getLandmark(FaceLandmark.LEFT_EYE);
-        if (face.getLeftEyeOpenProbability() != null) {
-            canvas.drawText(
-                    "Left eye open: " + String.format(Locale.US, "%.2f", face.getLeftEyeOpenProbability()),
-                    left,
-                    top + yLabelOffset,
-                    idPaints[colorID]);
-            yLabelOffset += lineHeight;
-        }
-        if (leftEye != null) {
-            float leftEyeLeft =
-                    translateX(leftEye.getPosition().x) - idPaints[colorID].measureText("Left Eye") / 2.0f;
-            canvas.drawRect(
-                    leftEyeLeft - BOX_STROKE_WIDTH,
-                    translateY(leftEye.getPosition().y) + ID_Y_OFFSET - ID_TEXT_SIZE,
-                    leftEyeLeft + idPaints[colorID].measureText("Left Eye") + BOX_STROKE_WIDTH,
-                    translateY(leftEye.getPosition().y) + ID_Y_OFFSET + BOX_STROKE_WIDTH,
-                    labelPaints[colorID]);
-            canvas.drawText(
-                    "Left Eye",
-                    leftEyeLeft,
-                    translateY(leftEye.getPosition().y) + ID_Y_OFFSET,
-                    idPaints[colorID]);
-        }
-
-        FaceLandmark rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE);
-        if (face.getRightEyeOpenProbability() != null) {
-            canvas.drawText(
-                    "Right eye open: " + String.format(Locale.US, "%.2f", face.getRightEyeOpenProbability()),
-                    left,
-                    top + yLabelOffset,
-                    idPaints[colorID]);
-        }
-        if (rightEye != null) {
-            float rightEyeLeft =
-                    translateX(rightEye.getPosition().x) - idPaints[colorID].measureText("Right Eye") / 2.0f;
-            canvas.drawRect(
-                    rightEyeLeft - BOX_STROKE_WIDTH,
-                    translateY(rightEye.getPosition().y) + ID_Y_OFFSET - ID_TEXT_SIZE,
-                    rightEyeLeft + idPaints[colorID].measureText("Right Eye") + BOX_STROKE_WIDTH,
-                    translateY(rightEye.getPosition().y) + ID_Y_OFFSET + BOX_STROKE_WIDTH,
-                    labelPaints[colorID]);
-            canvas.drawText(
-                    "Right Eye",
-                    rightEyeLeft,
-                    translateY(rightEye.getPosition().y) + ID_Y_OFFSET,
-                    idPaints[colorID]);
-            yLabelOffset += lineHeight;
-        }
+//        FaceLandmark leftEye = face.getLandmark(FaceLandmark.LEFT_EYE);
+//        if (face.getLeftEyeOpenProbability() != null) {
+//            canvas.drawText(
+//                    "Left eye open: " + String.format(Locale.US, "%.2f", face.getLeftEyeOpenProbability()),
+//                    left,
+//                    top + yLabelOffset,
+//                    idPaints[colorID]);
+//            yLabelOffset += lineHeight;
+//        }
+//        if (leftEye != null) {
+//            float leftEyeLeft =
+//                    translateX(leftEye.getPosition().x) - idPaints[colorID].measureText("Left Eye") / 2.0f;
+//            canvas.drawRect(
+//                    leftEyeLeft - BOX_STROKE_WIDTH,
+//                    translateY(leftEye.getPosition().y) + ID_Y_OFFSET - ID_TEXT_SIZE,
+//                    leftEyeLeft + idPaints[colorID].measureText("Left Eye") + BOX_STROKE_WIDTH,
+//                    translateY(leftEye.getPosition().y) + ID_Y_OFFSET + BOX_STROKE_WIDTH,
+//                    labelPaints[colorID]);
+//            canvas.drawText(
+//                    "Left Eye",
+//                    leftEyeLeft,
+//                    translateY(leftEye.getPosition().y) + ID_Y_OFFSET,
+//                    idPaints[colorID]);
+//        }
+//
+//        FaceLandmark rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE);
+//        if (face.getRightEyeOpenProbability() != null) {
+//            canvas.drawText(
+//                    "Right eye open: " + String.format(Locale.US, "%.2f", face.getRightEyeOpenProbability()),
+//                    left,
+//                    top + yLabelOffset,
+//                    idPaints[colorID]);
+//        }
+//        if (rightEye != null) {
+//            float rightEyeLeft =
+//                    translateX(rightEye.getPosition().x) - idPaints[colorID].measureText("Right Eye") / 2.0f;
+//            canvas.drawRect(
+//                    rightEyeLeft - BOX_STROKE_WIDTH,
+//                    translateY(rightEye.getPosition().y) + ID_Y_OFFSET - ID_TEXT_SIZE,
+//                    rightEyeLeft + idPaints[colorID].measureText("Right Eye") + BOX_STROKE_WIDTH,
+//                    translateY(rightEye.getPosition().y) + ID_Y_OFFSET + BOX_STROKE_WIDTH,
+//                    labelPaints[colorID]);
+//            canvas.drawText(
+//                    "Right Eye",
+//                    rightEyeLeft,
+//                    translateY(rightEye.getPosition().y) + ID_Y_OFFSET,
+//                    idPaints[colorID]);
+//            yLabelOffset += lineHeight;
+//        }
 
         canvas.drawText(
                 "EulerX: " + face.getHeadEulerAngleX(), left, top + yLabelOffset, idPaints[colorID]);
@@ -233,6 +276,9 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
         drawFaceLandmark(canvas, FaceLandmark.RIGHT_EYE);
         drawFaceLandmark(canvas, FaceLandmark.LEFT_CHEEK);
         drawFaceLandmark(canvas, FaceLandmark.RIGHT_CHEEK);
+        drawFaceLandmark(canvas, FaceLandmark.MOUTH_BOTTOM);
+        drawFaceLandmark(canvas, FaceLandmark.MOUTH_LEFT);
+        drawFaceLandmark(canvas, FaceLandmark.MOUTH_RIGHT);
     }
 
     private void drawFaceLandmark(Canvas canvas, @FaceLandmark.LandmarkType int landmarkType) {
@@ -244,7 +290,17 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                     FACE_POSITION_RADIUS,
                     facePositionPaint);
         }
+
+
+
     }
 
 
+
+
+
+
+
 }
+
+

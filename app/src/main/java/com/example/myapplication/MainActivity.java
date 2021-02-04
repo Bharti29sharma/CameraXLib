@@ -112,6 +112,7 @@ public final class MainActivity extends  AppCompatActivity implements
         if (preview == null) {
             Log.d(TAG, "Preview is null");
         }
+
         graphicOverlay = findViewById(R.id.graphic_overlay);
         if (graphicOverlay == null) {
             Log.d(TAG, "graphicOverlay is null");
@@ -123,6 +124,9 @@ public final class MainActivity extends  AppCompatActivity implements
             createCameraSource(selectedModel);
         } else {
             getRuntimePermissions();
+        }
+        if (cameraSource != null) {
+            cameraSource.setFacing(CameraSource.CAMERA_FACING_FRONT);
         }
 
     }
