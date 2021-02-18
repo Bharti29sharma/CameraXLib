@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class GraphicOverlay extends View {
     private final Object lock = new Object();
-    private final List<Graphic> graphics = new ArrayList<>();
+    public final List<Graphic> graphics = new ArrayList<>();
     // Matrix for transforming from image coordinates to overlay view coordinates.
     private final Matrix transformationMatrix = new Matrix();
 

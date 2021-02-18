@@ -5,7 +5,7 @@ import android.graphics.Canvas;
 
 public class CameraImageGraphic extends GraphicOverlay.Graphic {
 
-    private final Bitmap bitmap;
+    public final Bitmap bitmap;
 
     public CameraImageGraphic(GraphicOverlay overlay, Bitmap bitmap) {
         super(overlay);

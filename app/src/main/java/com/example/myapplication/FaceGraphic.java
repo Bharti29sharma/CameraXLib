@@ -1,11 +1,22 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -14,7 +25,11 @@ import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceContour;
 import com.google.mlkit.vision.face.FaceLandmark;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Locale;
+import java.util.Random;
 
 public class FaceGraphic  extends GraphicOverlay.Graphic {
     private static final float FACE_POSITION_RADIUS = 8.0f;
@@ -23,8 +38,8 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
     private static final float BOX_STROKE_WIDTH = 5.0f;
     private static final int NUM_COLORS = 10;
     private static final int[][] COLORS =
-            new int[][] {
-                    // {Text color, background color}
+            new int[][]{
+                    // {Text color, background color}`
                     {Color.BLACK, Color.WHITE},
                     {Color.WHITE, Color.MAGENTA},
                     {Color.BLACK, Color.LTGRAY},
@@ -37,22 +52,30 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                     {Color.BLACK, Color.GREEN}
             };
 
-    private final Paint facePositionPaint;
+    private final Paint facePositionPaint, facePositionPaintBlack;
     private final Paint[] idPaints;
     private final Paint[] boxPaints;
     private final Paint[] labelPaints;
 
     private volatile Face face;
-    Bitmap bitmap;
+    Bitmap overlayBitmap, canvasBitmap;
+    Drawable drawable;
+    GraphicOverlay graphicOverlay;
+
 
     FaceGraphic(GraphicOverlay overlay, Face face) {
         super(overlay);
+        graphicOverlay = overlay;
+
 
         this.face = face;
         final int selectedColor = Color.WHITE;
 
         facePositionPaint = new Paint();
         facePositionPaint.setColor(selectedColor);
+
+        facePositionPaintBlack = new Paint();
+        facePositionPaintBlack.setColor(Color.BLACK);
 
         int numColors = COLORS.length;
         idPaints = new Paint[numColors];
@@ -73,24 +96,23 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
             labelPaints[i].setStyle(Paint.Style.FILL);
         }
 
-         bitmap = Bitmap.createBitmap(500/*width*/, 500/*height*/, Bitmap.Config.ARGB_8888);
+        //bitmap = Bitmap.createBitmap(500/*width*/, 500/*height*/, Bitmap.Config.ARGB_8888);
     }
 
-    /** Draws the face annotations for position on the supplied canvas. */
+    /**
+     * Draws the face annotations for position on the supplied canvas.
+     */
     @Override
     public void draw(Canvas canvas) {
-      //  canvas.setBitmap(bitmap);
-
+       // canvasBitmap = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Bitmap.Config.ARGB_8888);
+        //canvas = new Canvas(canvasBitmap);
         Face face = this.face;
         if (face == null) {
             return;
         }
-
         // Draws a circle at the position of the detected face, with the face's track id below.
         float x = translateX(face.getBoundingBox().centerX());
         float y = translateY(face.getBoundingBox().centerY());
-       // canvas.drawCircle(x, y, FACE_POSITION_RADIUS, facePositionPaint);
-      //  canvas.drawRect();
 
         // Calculate positions.
         float left = x - scale(face.getBoundingBox().width() / 2.0f);
@@ -156,7 +178,7 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                 top,
                 labelPaints[colorID]);
         yLabelOffset += ID_TEXT_SIZE;
-       canvas.drawRect(left, top, right, bottom, boxPaints[colorID]);
+        canvas.drawRect(left, top, right, bottom, boxPaints[colorID]);
         if (face.getTrackingId() != null) {
             canvas.drawText("ID: " + face.getTrackingId(), left, top + yLabelOffset, idPaints[colorID]);
             yLabelOffset += lineHeight;
@@ -171,35 +193,51 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
             }
         }
 
+        try {
 
-        if(face.getAllLandmarks() != null) {
-            float cheek1Left = translateX(face.getLandmark(FaceLandmark.LEFT_EAR).getPosition().x);
-            float cheek1Right = translateX(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().x);
-            float cheek1Top = translateY(face.getLandmark(FaceLandmark.LEFT_EYE).getPosition().y);
-            float cheek1Bottom = translateY(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().y);
+            if (face.getAllLandmarks() != null) {
+                float cheek1Left = translateX(face.getLandmark(FaceLandmark.LEFT_EAR).getPosition().x);
+                float cheek1Right = translateX(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().x);
+                float cheek1Top = translateY(face.getLandmark(FaceLandmark.LEFT_EYE).getPosition().y);
+                float cheek1Bottom = translateY(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().y);
 
-            float cheek2Left = translateX(face.getLandmark(FaceLandmark.RIGHT_EAR).getPosition().x);
-            float cheek2Right = translateX(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().x);
-            float cheek2Top = translateY(face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition().y);
-            float cheek2Bottom = translateY(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().y);
+                float cheek2Left = translateX(face.getLandmark(FaceLandmark.RIGHT_EAR).getPosition().x);
+                float cheek2Right = translateX(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().x);
+                float cheek2Top = translateY(face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition().y);
+                float cheek2Bottom = translateY(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().y);
+
+
+                canvas.drawRect(cheek1Left, cheek1Top + 50, cheek1Right + 60,
+                        cheek1Bottom, boxPaints[1]);
+
+                canvas.drawRect(cheek2Left - 20, cheek2Top + 50, cheek2Right - 60,
+                        cheek2Bottom, boxPaints[1]);
+
+                //overlayBitmap.setPixels(cheek2Left - 20, cheek2Bottom ,Color.GREEN);
+                Rect rect = new Rect((int) cheek2Left, (int) cheek2Top, (int) cheek2Right, (int) cheek2Bottom);
+                overlayBitmap = ((CameraImageGraphic) graphicOverlay.graphics.get(0)).bitmap;
+                // croppedImg =   cropBitmap(overlayBitmap,face.getBoundingBox());
+
+
+                overlayBitmap = getCroppedBitmap(overlayBitmap);
+                if (overlayBitmap != null)
+                    //if(createTransparentBitmapFromBitmap(overlayBitmap ,Color.BLACK) != null )
+                    MediaStore.Images.Media.insertImage(this.getApplicationContext().getContentResolver(), overlayBitmap, "CroppedFace", "FaceDetaction");
+
+
+                Log.d("face.getAllContours()", face.getAllContours().toString());
+
+                Log.d("face.getAllLandmarks()", face.getAllLandmarks().toString());
+
+                Log.d("face.getBoundingBox()", face.getBoundingBox().toString());
 
 
 
-            canvas.drawRect(cheek1Left, cheek1Top + 50, cheek1Right + 60,
-                    cheek1Bottom, boxPaints[1]);
 
-            canvas.drawRect(cheek2Left -20  , cheek2Top + 50 , cheek2Right - 60 ,
-                    cheek2Bottom, boxPaints[1]);
-
-            // canvas.drawRect(cheekLeft -20f, cheekTop -50f, cheekRight+20f, cheekBottom + 50f, boxPaints[colorID]);
-            Log.d("face.getAllContours()", face.getAllContours().toString());
-
-            Log.d("face.getAllLandmarks()", face.getAllLandmarks().toString());
-
-            Log.d("face.getBoundingBox()", face.getBoundingBox().toString());
-
+            }
+        } catch (Exception e) {
+            Log.e("Cropp face error", e.getMessage().toString());
         }
-
 
 
         // Draws smiling and left/right eye open probabilities.
@@ -289,18 +327,57 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                     translateY(faceLandmark.getPosition().y),
                     FACE_POSITION_RADIUS,
                     facePositionPaint);
-        }
 
+
+        }
 
 
     }
 
+    public static Bitmap cropBitmap(Bitmap bitmap, Rect rect) {
+        final Paint boxPaint;
+        //  boxPaint = new Paint[5];
+        boxPaint = new Paint();
+        boxPaint.setColor(Color.GREEN /* background color */);
+        boxPaint.setStyle(Paint.Style.STROKE);
+        boxPaint.setStrokeWidth(BOX_STROKE_WIDTH);
+        int w = rect.right - rect.left;
+        int h = rect.bottom - rect.top;
+        Bitmap ret = Bitmap.createBitmap(w, h, bitmap.getConfig());
+        // Canvas canvas = new Canvas(ret);
+        // canvas.drawBitmap(bitmap, -rect.left, -rect.top,boxPaint);
 
+        return ret;
+    }
 
+    public Bitmap getCroppedBitmap(Bitmap bitmap) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
 
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
 
-
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+                bitmap.getWidth() / 2, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        return output;
+    }
 
 }
+
+
+
+
+
+
+
+
+
 
 
