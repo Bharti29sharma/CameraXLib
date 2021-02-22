@@ -192,41 +192,20 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
 
         // Draws all face contours.
         for (FaceContour contour : face.getAllContours()) {
+
             for (PointF point : contour.getPoints()) {
                 canvas.drawCircle(
                         translateX(point.x), translateY(point.y), FACE_POSITION_RADIUS, facePositionPaint);
+
             }
+
         }
 
         try {
 
-            if (face.getAllLandmarks() != null) {
-//                float cheek1Left = translateX(face.getLandmark(FaceLandmark.LEFT_EAR).getPosition().x);
-//                float cheek1Right = translateX(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().x);
-//                float cheek1Top = translateY(face.getLandmark(FaceLandmark.LEFT_EYE).getPosition().y);
-//                float cheek1Bottom = translateY(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().y);
-//
-//                float cheek2Left = translateX(face.getLandmark(FaceLandmark.RIGHT_EAR).getPosition().x);
-//                float cheek2Right = translateX(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().x);
-//                float cheek2Top = translateY(face.getLandmark(FaceLandmark.RIGHT_EYE).getPosition().y);
-//                float cheek2Bottom = translateY(face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().y);
-//
-//
-//                final Paint shapPaint;
-//                shapPaint = new Paint();
-//                shapPaint.setColor(Color.GREEN /* background color */);
-//                shapPaint.setStyle(Paint.Style.FILL);
-//                shapPaint.setStrokeWidth(BOX_STROKE_WIDTH);
-
-//              canvas.drawRect(cheek1Left , cheek1Top + 60, cheek1Right +100  ,
-//                      cheek1Bottom, shapPaint);
-//
-//               canvas.drawRect(cheek2Left + 50 , cheek2Top +40 , cheek2Right-120 ,
-//                cheek2Bottom, shapPaint);
-
-
-
                 // Code for highlight features and bitmap Pixel
+
+                    drawShapsOnBitmap();
 
                 int iLength = (int)face.getLandmark(FaceLandmark.RIGHT_EAR).getPosition().x-10;
                 int i = (int) face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().x+20;
@@ -238,7 +217,7 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                 int[] pixelArray = new int[arrayLength];
                 int arrayIndex=0;
 
-                   // int[] pix = new int[iLength * jLength];
+
 
                     for (int l = j; l <= jLength; l++) {
                             for (int k = i; k <= iLength; k++) {
@@ -249,21 +228,34 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                                 }
                             overlayBitmap.setPixel(k,l, Color.GREEN);
 
-                            Log.d("k,l", String.valueOf(k) + " ," + String.valueOf(l));
-
                         }
                     }
 
-                getRGBValue(pixelArray);
+
+            int leftCheek_xRight = (int)face.getLandmark(FaceLandmark.LEFT_EAR).getPosition().x+10;
+            int leftCheek_xLeft = (int) face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().x-20;
+            int leftCheek_yBottom =(int) face.getLandmark(FaceLandmark.LEFT_EYE).getPosition().y+10;
+            int leftCheek_yTop = (int) face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().y;
+
+
+            for (int l  =leftCheek_yBottom ; l <= leftCheek_yTop; l++) {
+                for (int k = leftCheek_xRight; k <= leftCheek_xLeft; k++) {
+
+                    overlayBitmap.setPixel(k,l, Color.GREEN);
+
+                }
+            }
+//                getRGBValue(pixelArray);
+
 
                 if (overlayBitmap != null)
                     MediaStore.Images.Media.insertImage(this.getApplicationContext().getContentResolver(), overlayBitmap, "CroppedFace", "FaceDetaction");
 
-//                Log.d("face.getAllContours()", face.getAllContours().toString());
+               Log.d("face.getAllContours()", face.getAllContours().toString());
 //                Log.d("face.getAllLandmarks()", face.getAllLandmarks().toString());
 //                Log.d("face.getBoundingBox()", face.getBoundingBox().toString());
 
-            }
+
         } catch (Exception e) {
             Log.e("Cropp face error", e.getMessage().toString());
         }
@@ -289,6 +281,67 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                     FACE_POSITION_RADIUS,
                     facePositionPaint);
 
+
+        }
+
+
+    }
+
+    private void  drawShapsOnBitmap(){
+
+        FaceLandmark leftEyefaceLandmark = face.getLandmark(FaceLandmark.LEFT_EYE);
+        FaceLandmark rightEyefaceLandmark = face.getLandmark(FaceLandmark.RIGHT_EYE);
+        PointF noseTopPoint ,noseLeftPoint, noseRightPoint,noseBottomPoint ,foreheadTopPoint ;
+        foreheadTopPoint = new PointF();
+        noseTopPoint = new PointF();
+        noseLeftPoint = new PointF();
+        noseRightPoint = new PointF();
+        noseBottomPoint = new PointF();
+
+       int c =0;
+        for (FaceContour contour : face.getAllContours()) {
+            if(contour.getFaceContourType() == 1) {
+                foreheadTopPoint = contour.getPoints().get(0);
+            }else if(contour.getFaceContourType() == 12){
+                noseTopPoint =  contour.getPoints().get(0);
+                noseBottomPoint = contour.getPoints().get(1);
+            }else if(contour.getFaceContourType() == 13){
+                noseLeftPoint = contour.getPoints().get(2);
+                noseRightPoint = contour.getPoints().get(0);
+            }
+            c++;
+
+        }
+        // Draw Forehead patch
+        int forehead_xLeft  = (int) leftEyefaceLandmark.getPosition().x;
+        int forehead_xRight = (int) rightEyefaceLandmark.getPosition().x;
+        int forehead_yTop   = (int) foreheadTopPoint.y+10;
+        int forehead_yBottom  = (int)  leftEyefaceLandmark.getPosition().y-25 ;
+
+
+        for( int i = forehead_yTop; i<=forehead_yBottom ; i++){
+
+            for(int j = forehead_xLeft ; j <=  forehead_xRight ; j++){
+                overlayBitmap.setPixel(j,i, Color.GREEN);
+
+            }
+        }
+
+       // overlayBitmap.setPixel((int)foreheadTopPoint.x,(int)foreheadTopPoint.y,Color.GREEN);
+
+        //Draw Nose Patch
+       int noseXRight =  (int)noseRightPoint.x;
+        int noseXLeft =  (int)noseLeftPoint.x;
+
+        for( int i =(int) noseBottomPoint.y; i>= (int)noseTopPoint.y ; i--){
+
+            for(int j = noseXRight-5 ; j <=  noseXLeft+5 ; j++){
+                overlayBitmap.setPixel(j,i, Color.GREEN);
+
+            }
+
+            noseXRight ++;
+            noseXLeft--;
 
         }
 
