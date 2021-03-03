@@ -6,15 +6,18 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
-import android.provider.MediaStore;
 import android.util.Log;
 
+import com.example.myapplication.model.HealthData;
 import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceContour;
 import com.google.mlkit.vision.face.FaceLandmark;
 
 import java.util.HashMap;
-import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class FaceGraphic  extends GraphicOverlay.Graphic {
     private static final float FACE_POSITION_RADIUS = 8.0f;
@@ -46,6 +49,8 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
     Bitmap overlayBitmap, canvasBitmap;
     Drawable drawable;
     GraphicOverlay graphicOverlay;
+
+
 
 
     FaceGraphic(GraphicOverlay overlay, Face face) {
@@ -90,16 +95,15 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
      */
     @Override
     public void draw(Canvas canvas) {
-       // canvasBitmap = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Bitmap.Config.ARGB_8888);
-        //canvas = new Canvas(canvasBitmap);
+
         Face face = this.face;
         if (face == null) {
             return;
         }
-        overlayBitmap = ((CameraImageGraphic) graphicOverlay.graphics.get(0)).bitmap;
-      //  Rect rectB = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
 
-       // canvas.drawBitmap( ((CameraImageGraphic) graphicOverlay.graphics.get(0)).bitmap,null,rectB,boxPaints[0]);
+
+        overlayBitmap = ((CameraImageGraphic) graphicOverlay.graphics.get(0)).bitmap;
+
         // Draws a circle at the position of the detected face, with the face's track id below.
         float x = translateX(face.getBoundingBox().centerX());
         float y = translateY(face.getBoundingBox().centerY());
@@ -109,104 +113,65 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
         float top = y - scale(face.getBoundingBox().height() / 2.0f);
         float right = x + scale(face.getBoundingBox().width() / 2.0f);
         float bottom = y + scale(face.getBoundingBox().height() / 2.0f);
-        float lineHeight = ID_TEXT_SIZE + BOX_STROKE_WIDTH;
-        float yLabelOffset = (face.getTrackingId() == null) ? 0 : -lineHeight;
 
         // Decide color based on face ID
         int colorID = (face.getTrackingId() == null) ? 0 : Math.abs(face.getTrackingId() % NUM_COLORS);
 
-        // Calculate width and height of label box
-        float textWidth = idPaints[colorID].measureText("ID: " + face.getTrackingId());
-        if (face.getSmilingProbability() != null) {
-            yLabelOffset -= lineHeight;
-            textWidth =
-                    Math.max(
-                            textWidth,
-                            idPaints[colorID].measureText(
-                                    String.format(Locale.US, "Happiness: %.2f", face.getSmilingProbability())));
-        }
-        if (face.getLeftEyeOpenProbability() != null) {
-            yLabelOffset -= lineHeight;
-            textWidth =
-                    Math.max(
-                            textWidth,
-                            idPaints[colorID].measureText(
-                                    String.format(
-                                            Locale.US, "Left eye open: %.2f", face.getLeftEyeOpenProbability())));
-        }
-        if (face.getRightEyeOpenProbability() != null) {
-            yLabelOffset -= lineHeight;
-            textWidth =
-                    Math.max(
-                            textWidth,
-                            idPaints[colorID].measureText(
-                                    String.format(
-                                            Locale.US, "Right eye open: %.2f", face.getRightEyeOpenProbability())));
-        }
+        float h_delta =(float) 0.1 * face.getBoundingBox().width();
+        float  v_delta =(float) 0.1 * face.getBoundingBox().height();
+        canvas.drawLine(left, top, left, top+v_delta, boxPaints[colorID]);
+        canvas.drawLine(left, top, left+h_delta, top, boxPaints[colorID]);
 
-        yLabelOffset = yLabelOffset - 3 * lineHeight;
-        textWidth =
-                Math.max(
-                        textWidth,
-                        idPaints[colorID].measureText(
-                                String.format(Locale.US, "EulerX: %.2f", face.getHeadEulerAngleX())));
-        textWidth =
-                Math.max(
-                        textWidth,
-                        idPaints[colorID].measureText(
-                                String.format(Locale.US, "EulerY: %.2f", face.getHeadEulerAngleY())));
-        textWidth =
-                Math.max(
-                        textWidth,
-                        idPaints[colorID].measureText(
-                                String.format(Locale.US, "EulerZ: %.2f", face.getHeadEulerAngleZ())));
-        // Draw labels
-        canvas.drawRect(
-                left - BOX_STROKE_WIDTH,
-                top + yLabelOffset,
-                left + textWidth + (2 * BOX_STROKE_WIDTH),
-                top,
-                labelPaints[colorID]);
-        yLabelOffset += ID_TEXT_SIZE;
-        canvas.drawRect(left, top, right, bottom, boxPaints[colorID]);
-        if (face.getTrackingId() != null) {
-            canvas.drawText("ID: " + face.getTrackingId(), left, top + yLabelOffset, idPaints[colorID]);
-            yLabelOffset += lineHeight;
-        }
+        canvas.drawLine(left, bottom, left, bottom-v_delta, boxPaints[colorID]);
+        canvas.drawLine(left, bottom, left+h_delta, bottom, boxPaints[colorID]);
+
+        canvas.drawLine(right, top, right-h_delta, top, boxPaints[colorID]);
+        canvas.drawLine(right, top, right, top+v_delta, boxPaints[colorID]);
+
+        canvas.drawLine(right, bottom, right-h_delta, bottom, boxPaints[colorID]);
+        canvas.drawLine(right, bottom, right, bottom-v_delta, boxPaints[colorID]);
 
 
-        // Draws all face contours.
-        for (FaceContour contour : face.getAllContours()) {
 
-            for (PointF point : contour.getPoints()) {
-                canvas.drawCircle(
-                        translateX(point.x), translateY(point.y), FACE_POSITION_RADIUS, facePositionPaint);
 
+
+//        // Draws all face contours.
+//        for (FaceContour contour : face.getAllContours()) {
+//
+//            for (PointF point : contour.getPoints()) {
+//                canvas.drawCircle(
+//                        translateX(point.x), translateY(point.y), FACE_POSITION_RADIUS, facePositionPaint);
+//
+//            }
+//        }
+
+        if(SingletonClass.getInstance().isRecordingStarted == true && SingletonClass.getInstance().isRecordingFinished == false) {
+            try {
+                SingletonClass.getInstance().frameCount ++;
+                drawShapesOnBitmap();
+
+                if(SingletonClass.getInstance().frameCount == 30){
+                   // SingletonClass.getInstance().isRecordingFinished = true;
+                }
+               // if (overlayBitmap != null)
+                 //   MediaStore.Images.Media.insertImage(this.getApplicationContext().getContentResolver(), overlayBitmap, "CroppedFace", "FaceDetaction");
+
+
+
+               // Log.d("face.getAllContours()", face.getAllContours().toString());
+
+
+            } catch (Exception e) {
+                Log.e("Cropp face error", e.getMessage().toString());
             }
         }
-
-        try{
-            drawShapesOnBitmap();
-
-                if (overlayBitmap != null)
-                    MediaStore.Images.Media.insertImage(this.getApplicationContext().getContentResolver(), overlayBitmap, "CroppedFace", "FaceDetaction");
-
-               Log.d("face.getAllContours()", face.getAllContours().toString());
-
-
-
-        } catch (Exception e) {
-            Log.e("Cropp face error", e.getMessage().toString());
+        else if(SingletonClass.getInstance().isRecordingFinished == true){
+            //REST api call and finish activity
+        int size =    SingletonClass.getInstance().leftcheekFramMap.size();
+            Log.v("Frame Count :: ", String.valueOf(SingletonClass.getInstance().frameCount));
         }
 
-        // Draw facial landmarks
-        drawFaceLandmark(canvas, FaceLandmark.LEFT_EYE);
-        drawFaceLandmark(canvas, FaceLandmark.RIGHT_EYE);
-        drawFaceLandmark(canvas, FaceLandmark.LEFT_CHEEK);
-        drawFaceLandmark(canvas, FaceLandmark.RIGHT_CHEEK);
-        drawFaceLandmark(canvas, FaceLandmark.MOUTH_BOTTOM);
-        drawFaceLandmark(canvas, FaceLandmark.MOUTH_LEFT);
-        drawFaceLandmark(canvas, FaceLandmark.MOUTH_RIGHT);
+
     }
 
     private void drawFaceLandmark(Canvas canvas, @FaceLandmark.LandmarkType int landmarkType) {
@@ -272,7 +237,7 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                     foreheadPixelArray[foreheadArrayIndex] = overlayBitmap.getPixel(j,i);
                     foreheadArrayIndex++;
                 }
-                overlayBitmap.setPixel(j,i, Color.GREEN);
+               // overlayBitmap.setPixel(j,i, Color.GREEN);
 
             }
         }
@@ -300,7 +265,7 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                     noseArrayIndex++;
                 }
 
-                overlayBitmap.setPixel(j,i, Color.GREEN);
+              //  overlayBitmap.setPixel(j,i, Color.GREEN);
 
             }
 
@@ -331,7 +296,7 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                     pixelArray[arrayIndex] = overlayBitmap.getPixel(k, l);
                     arrayIndex++;
                 }
-                overlayBitmap.setPixel(k,l, Color.GREEN);
+               // overlayBitmap.setPixel(k,l, Color.GREEN);
 
             }
         }
@@ -345,7 +310,10 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
         int leftCheek_yBottom =(int) face.getLandmark(FaceLandmark.LEFT_EYE).getPosition().y+10;
         int leftCheek_yTop = (int) face.getLandmark(FaceLandmark.NOSE_BASE).getPosition().y;
 
-        int leftCheekPixArrayLength =    (leftCheek_yTop-leftCheek_yBottom) * (leftCheek_xLeft - leftCheek_xRight);  // width * height
+        int leftCheekHeight = leftCheek_yTop-leftCheek_yBottom;
+        int leftCheekWidth = leftCheek_xLeft - leftCheek_xRight;
+
+        int leftCheekPixArrayLength =    leftCheekWidth * leftCheekHeight;  // width * height
         int[] leftCheekPixelArray = new int[leftCheekPixArrayLength];
         int leftCheekArrayIndex=0;
 
@@ -357,14 +325,16 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                     leftCheekArrayIndex++;
                 }
 
-                overlayBitmap.setPixel(k,l, Color.GREEN);
+               // overlayBitmap.setPixel(k,l, Color.GREEN);
 
             }
         }
 
         leftCheekMap =  getRGBValue(leftCheekPixelArray);
 
-        // Get 1D array of RGB
+
+
+        // Get 1D array of RGB for left cheek
 
         int[] calculatedRGB  = new int[leftCheekMap.size()];
         int index =0;
@@ -374,6 +344,21 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                 index ++;
 
          }
+
+
+
+        SingletonClass.getInstance().leftcheekFramMap.put(SingletonClass.getInstance().frameCount,  calculatedRGB);
+
+//        for (Object key :  SingletonClass.getInstance().leftcheekFramMap.keySet()) {
+//
+//            calculatedRGB[index] = (int) leftCheekMap.get(key);
+//            index ++;
+//
+//        }
+
+       // if(SingletonClass.getInstance().frameCount == 30)
+        if(SingletonClass.getInstance().isRecordingFinished)
+        getDataFromServer(calculatedRGB ,leftCheekWidth,leftCheekHeight,SingletonClass.getInstance().frameCount);
     }
 
 
@@ -381,10 +366,7 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
 
         HashMap map = new HashMap();
 
-//        int[] red  = new int[pixels.length];
-//        int[] blue  = new int[pixels.length];
-//        int[] green  = new int[pixels.length];
-       // int[] alpha  = new int[pixels.length];
+
 
         for(int i =0 ; i < pixels.length ; i ++ ){
 
@@ -394,8 +376,8 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
           int  blue  = (pixels[i]) & 0xff;
 
             map.put(pixels[i] , red + green + blue);
-            if(i<10)
-            Log.v("HashMap of RGB value" , map.toString());
+           // if(i<10)
+           // Log.v("HashMap of RGB value" , map.toString());
 
 
         }
@@ -403,6 +385,31 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
         return map;
 
 
+
+    }
+  void  getDataFromServer (int[] value_array,int width ,int height , int n_channels){
+   APIInterface   apiInterface = APIClient.getClient().create(APIInterface.class);
+
+
+      /**
+       GET List Resources
+       **/
+      Call<HealthData> call = apiInterface.getHealthData(value_array,width,height,n_channels);
+
+      call.enqueue(new Callback<HealthData>() {
+          @Override
+          public void onResponse(Call<HealthData> call, Response<HealthData> response) {
+
+
+              Log.d("response TAG",response.code()+"");
+
+          }
+
+          @Override
+          public void onFailure(Call<HealthData> call, Throwable t) {
+              call.cancel();
+          }
+      });
 
     }
 

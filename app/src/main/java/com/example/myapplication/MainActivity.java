@@ -1,88 +1,47 @@
 package com.example.myapplication;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CaptureRequest;
+import android.media.ImageReader;
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.util.Log;
+import android.util.Size;
+import android.util.SparseIntArray;
+import android.view.TextureView;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import android.Manifest;
-import android.app.Activity;
-import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.graphics.PointF;
-import android.graphics.Rect;
-import android.os.Build;
-import android.os.Bundle;
-import android.content.pm.PackageManager;
-import android.graphics.ImageFormat;
-import android.graphics.SurfaceTexture;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CameraMetadata;
-import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.TotalCaptureResult;
-import android.hardware.camera2.params.StreamConfigurationMap;
-import android.media.Image;
-import android.media.ImageReader;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.HandlerThread;
-
-import android.util.Log;
-import android.util.Size;
-import android.util.SparseIntArray;
-import android.view.Surface;
-import android.view.TextureView;
-import android.view.View;
-import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.Spinner;
-import android.widget.Toast;
-import android.widget.ToggleButton;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.mlkit.common.model.LocalModel;
-import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.face.Face;
-import com.google.mlkit.vision.face.FaceDetection;
-import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
-import com.google.mlkit.vision.face.FaceLandmark;
-import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions;
-import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
 
 public final class MainActivity extends  AppCompatActivity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
+
+
     private static final String TAG = "AndroidCameraApi";
     private Button takePictureButton;
     private TextureView textureView;
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
-
-//    static {
-//        ORIENTATIONS.append(Surface.ROTATION_0, 90);
-//        ORIENTATIONS.append(Surface.ROTATION_90, 0);
-//        ORIENTATIONS.append(Surface.ROTATION_180, 270);
-//        ORIENTATIONS.append(Surface.ROTATION_270, 180);
-//    }
 
     private String cameraId;
     protected CameraDevice cameraDevice;
@@ -102,12 +61,19 @@ public final class MainActivity extends  AppCompatActivity implements
     private CameraSourcePreview preview;
     private GraphicOverlay graphicOverlay;
     String selectedModel = "Face Detection";
+    private int progressStatus = 0;
+    Handler handler =new Handler();
+
+
+    public MainActivity() {
+    }
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         preview = findViewById(R.id.preview_view);
         if (preview == null) {
             Log.d(TAG, "Preview is null");
@@ -117,7 +83,46 @@ public final class MainActivity extends  AppCompatActivity implements
         if (graphicOverlay == null) {
             Log.d(TAG, "graphicOverlay is null");
         }
-        ToggleButton facingSwitch = findViewById(R.id.facing_switch);
+       // ToggleButton facingSwitch = findViewById(R.id.facing_switch);
+        ImageButton recordingButton = findViewById(R.id.record_button);
+
+        ProgressBar progressBar = findViewById(R.id.progressBar);
+
+
+        recordingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SingletonClass.getInstance().isRecordingStarted  = true;
+                recordingButton.setEnabled(false);
+                progressBar.setVisibility(View.VISIBLE);
+              //  progressBar.setMax(10000);
+                new CountDownTimer(60000, 600) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        //this will be done every 1000 milliseconds ( 1 seconds )
+                        int progress = (int) ((60000 - millisUntilFinished) / 600);
+                        progressBar.setProgress(progress);
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        //the progressBar will be invisible after 60 000 miliseconds ( 1 minute)
+                      //  progressBar.setVisibility(View.INVISIBLE);
+
+                        SingletonClass.getInstance().isRecordingFinished  = true;
+                           Intent intent = new Intent(getApplicationContext(), UploadingActivity.class);
+                           startActivity(intent);
+                           finish();
+                    }
+
+                }.start();
+
+
+
+            }
+        });
+
 
 
         if (allPermissionsGranted()) {
@@ -245,6 +250,7 @@ public final class MainActivity extends  AppCompatActivity implements
         @Override
         public void onRequestPermissionsResult (
         int requestCode, String[] permissions,int[] grantResults){
+
             Log.i(TAG, "Permission granted!");
             if (allPermissionsGranted()) {
                 createCameraSource(selectedModel);

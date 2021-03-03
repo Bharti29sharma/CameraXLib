@@ -37,7 +37,7 @@ public class FaceDetectorProcessor extends VisionProcessorBase<List<Face>> {
 
     public FaceDetectorProcessor(Context context, FaceDetectorOptions options) {
         super(context);
-        Log.v("MANUAL_TESTING_LOG", "Face detector options: " + options);
+        //Log.v("MANUAL_TESTING_LOG", "Face detector options: " + options);
         detector = FaceDetection.getClient(options);
     }
 
@@ -62,10 +62,10 @@ public class FaceDetectorProcessor extends VisionProcessorBase<List<Face>> {
 
     private static void logExtrasForTesting(Face face) {
         if (face != null) {
-            Log.v("MANUAL_TESTING_LOG", "face bounding box: " + face.getBoundingBox().flattenToString());
-            Log.v("MANUAL_TESTING_LOG", "face Euler Angle X: " + face.getHeadEulerAngleX());
-            Log.v("MANUAL_TESTING_LOG", "face Euler Angle Y: " + face.getHeadEulerAngleY());
-            Log.v("MANUAL_TESTING_LOG", "face Euler Angle Z: " + face.getHeadEulerAngleZ());
+//            Log.v("MANUAL_TESTING_LOG", "face bounding box: " + face.getBoundingBox().flattenToString());
+//            Log.v("MANUAL_TESTING_LOG", "face Euler Angle X: " + face.getHeadEulerAngleX());
+//            Log.v("MANUAL_TESTING_LOG", "face Euler Angle Y: " + face.getHeadEulerAngleY());
+//            Log.v("MANUAL_TESTING_LOG", "face Euler Angle Z: " + face.getHeadEulerAngleZ());
 
             // All landmarks
             int[] landMarkTypes =
@@ -104,22 +104,22 @@ public class FaceDetectorProcessor extends VisionProcessorBase<List<Face>> {
                     PointF landmarkPosition = landmark.getPosition();
                     String landmarkPositionStr =
                             String.format(Locale.US, "x: %f , y: %f", landmarkPosition.x, landmarkPosition.y);
-                    Log.v(
-                            "MANUAL_TESTING_LOG",
-                            "Position for face landmark: "
-                                    + landMarkTypesStrings[i]
-                                    + " is :"
-                                    + landmarkPositionStr);
+//                    Log.v(
+//                            "MANUAL_TESTING_LOG",
+//                            "Position for face landmark: "
+//                                    + landMarkTypesStrings[i]
+//                                    + " is :"
+//                                    + landmarkPositionStr);
                 }
             }
-            Log.v(
-                    "MANUAL_TESTING_LOG",
-                    "face left eye open probability: " + face.getLeftEyeOpenProbability());
-            Log.v(
-                    "MANUAL_TESTING_LOG",
-                    "face right eye open probability: " + face.getRightEyeOpenProbability());
-            Log.v("MANUAL_TESTING_LOG", "face smiling probability: " + face.getSmilingProbability());
-            Log.v("MANUAL_TESTING_LOG", "face tracking id: " + face.getTrackingId());
+//            Log.v(
+//                    "MANUAL_TESTING_LOG",
+//                    "face left eye open probability: " + face.getLeftEyeOpenProbability());
+//            Log.v(
+//                    "MANUAL_TESTING_LOG",
+//                    "face right eye open probability: " + face.getRightEyeOpenProbability());
+//            Log.v("MANUAL_TESTING_LOG", "face smiling probability: " + face.getSmilingProbability());
+//            Log.v("MANUAL_TESTING_LOG", "face tracking id: " + face.getTrackingId());
         }
     }
 
