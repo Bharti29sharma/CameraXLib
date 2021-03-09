@@ -1,6 +1,10 @@
 package com.example.myapplication;
 
+import com.example.myapplication.model.HealthData;
+
 import java.util.HashMap;
+
+import retrofit2.Response;
 
 public class SingletonClass {
 
@@ -11,6 +15,7 @@ public class SingletonClass {
         public boolean isRecordingStarted = false;
         public boolean isRecordingFinished = false;
         public HashMap leftcheekFramMap = new HashMap();
+        public Response<HealthData> restResponse= null;
 
         protected SingletonClass(){}
 

@@ -34,7 +34,7 @@ public class CameraSourcePreview  extends ViewGroup {
         addView(surfaceView);
     }
 
-    private void start(CameraSource cameraSource) throws IOException {
+    public void start(CameraSource cameraSource) throws IOException {
         this.cameraSource = cameraSource;
 
         if (this.cameraSource != null) {

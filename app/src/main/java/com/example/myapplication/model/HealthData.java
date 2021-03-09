@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class HealthData {
 
-    public class faceResponse {
+
 
         @SerializedName("bpm")
         public String bpm;
@@ -13,5 +13,5 @@ public class HealthData {
         @SerializedName("si")
         public String si;
 
-    }
+
 }

@@ -9,17 +9,21 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
 import android.media.ImageReader;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.text.Html;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -63,6 +67,8 @@ public final class MainActivity extends  AppCompatActivity implements
     String selectedModel = "Face Detection";
     private int progressStatus = 0;
     Handler handler =new Handler();
+    long timeRemaining =0;
+    int previousProgress = 0;
 
 
     public MainActivity() {
@@ -88,35 +94,149 @@ public final class MainActivity extends  AppCompatActivity implements
 
         ProgressBar progressBar = findViewById(R.id.progressBar);
 
+      //  getActionBar().setBackgroundDrawable(getDrawable(R.drawable.remedic_mini));
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setLogo(R.drawable.remedic_mini_wo_bg);
+        getSupportActionBar().setDisplayUseLogoEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
+
+        String centerNBlack = "<div style='text-align:center' ><span style='color:black' >REMEDIC</span></div>";
+        getSupportActionBar().setTitle(Html.fromHtml(centerNBlack));
+
+
 
         recordingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 SingletonClass.getInstance().isRecordingStarted  = true;
-                recordingButton.setEnabled(false);
+               // recordingButton.setEnabled(false);
+
+                if(recordingButton.getTag().equals("Record")) {
+                    //Start recording
+                    recordingButton.setImageResource(R.drawable.ic_stop);
+                    recordingButton.setTag("Stop");
+
+                  //  cameraSource.stop();
+                    //startCameraSource();
+                }
+                else if(recordingButton.getTag().equals("Stop")){
+                    //stop recording
+                    recordingButton.setImageResource(R.drawable.ic_play_button);
+                    recordingButton.setTag("Play");
+                    cameraSource.stop();
+
+                }
+                else if(recordingButton.getTag().equals("Play")){
+                    //Restart recording
+                    recordingButton.setImageResource(R.drawable.ic_stop);
+                    recordingButton.setTag("Stop");
+
+                    try {
+
+                        cameraSource.start();
+                    } catch (IOException e) {
+                        Log.e("Start preview ", e.getMessage().toString());
+                        e.printStackTrace();
+                    }
+                }
                 progressBar.setVisibility(View.VISIBLE);
-              //  progressBar.setMax(10000);
-                new CountDownTimer(60000, 600) {
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-                        //this will be done every 1000 milliseconds ( 1 seconds )
-                        int progress = (int) ((60000 - millisUntilFinished) / 600);
-                        progressBar.setProgress(progress);
 
+
+
+                if(!recordingButton.getTag().equals("Play"))
+                new Thread(new Runnable() {
+                    public void run() {
+
+                        progressStatus = previousProgress;
+                        while (progressStatus < 6000) {
+                            progressStatus += 1;
+                            // Update the progress bar and display the
+                            //current value in the text view
+                            handler.post(new Runnable() {
+                                public void run() {
+                                    if(recordingButton.getTag().equals("Play")) {
+                                        previousProgress = progressStatus;
+                                        progressStatus = 6000;
+                                       // handler.removeCallbacks(null);
+
+                                    }
+                                    else {
+                                        progressBar.setProgress(progressStatus);
+                                        if(progressStatus==progressBar.getMax()){
+                                            SingletonClass.getInstance().isRecordingFinished  = true;
+                                            Intent intent = new Intent(getApplicationContext(), UploadingActivity.class);
+                                            startActivity(intent);
+                                            finish();
+                                        }
+                                    }
+
+                                }
+                            });
+                            try {
+                                // Sleep for 200 milliseconds.
+                                Thread.sleep(600);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
+                }).start();
 
-                    @Override
-                    public void onFinish() {
-                        //the progressBar will be invisible after 60 000 miliseconds ( 1 minute)
-                      //  progressBar.setVisibility(View.INVISIBLE);
 
-                        SingletonClass.getInstance().isRecordingFinished  = true;
-                           Intent intent = new Intent(getApplicationContext(), UploadingActivity.class);
-                           startActivity(intent);
-                           finish();
-                    }
 
-                }.start();
+
+
+
+                ///////////////////////////
+//                if (recordingButton.getTag().equals("Stop")) {
+//                    long milisInFuture;
+//                    int progress;
+//                    if(timeRemaining == 0) {
+//                        milisInFuture = 6000;
+//
+//                    }
+//                    else
+//                        milisInFuture = timeRemaining;
+//                   // progress = previousProgress;
+//
+//
+//                    long countDownInterval = milisInFuture/10;
+//
+//                    new CountDownTimer(milisInFuture, countDownInterval) {
+//                        @Override
+//                        public void onTick(long millisUntilFinished) {
+//                                //this will be done every 1000 milliseconds ( 1 seconds )
+//                            int progress = (int) ((milisInFuture - millisUntilFinished) / countDownInterval);
+//                            if(recordingButton.getTag().equals("Play")){
+//                                timeRemaining =milisInFuture;
+//                                previousProgress= progress;
+//                                this.cancel();
+//
+//                            }
+//                            else {
+//
+//                                if(milisInFuture == timeRemaining)
+//                                    progress = progress+ previousProgress;
+//                                progressBar.setProgress(progress);
+//                            }
+//
+//
+//                        }
+//
+//                        @Override
+//                        public void onFinish() {
+//
+////                        SingletonClass.getInstance().isRecordingFinished  = true;
+////                           Intent intent = new Intent(getApplicationContext(), UploadingActivity.class);
+////                           startActivity(intent);
+////                           finish();
+//                        }
+//
+//                    }.start();
+//                }
+//
+
 
 
 
@@ -185,7 +305,58 @@ public final class MainActivity extends  AppCompatActivity implements
             }
                }
 
-        @Override
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+
+        final MenuItem toggleservice = menu.findItem(R.id.menu_toogle);
+        final Switch actionView = (Switch) toggleservice.getActionView();
+        actionView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                // Start or stop your Service
+                if (cameraSource != null) {
+                    if ( buttonView.isChecked()) {
+                        cameraSource.setFacing(CameraSource.CAMERA_FACING_BACK);
+
+                    } else {
+                        cameraSource.setFacing(CameraSource.CAMERA_FACING_FRONT);
+                    }
+                }
+                preview.stop();
+                startCameraSource();
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
+        //return true;
+    }
+
+
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) { switch(item.getItemId()) {
+//        case R.id.menu_toogle:
+//            Log.d(TAG, "Set facing");
+//
+//            if (cameraSource != null) {
+//                if ( item.isChecked()) {
+//                    cameraSource.setFacing(CameraSource.CAMERA_FACING_FRONT);
+//                } else {
+//                    cameraSource.setFacing(CameraSource.CAMERA_FACING_BACK);
+//                }
+//            }
+//            preview.stop();
+//            startCameraSource();
+//            return(true);
+//
+//    }
+//        return(super.onOptionsItemSelected(item));
+//    }
+
+
+    @Override
         public void onResume () {
             super.onResume();
             Log.d(TAG, "onResume");

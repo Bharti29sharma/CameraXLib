@@ -2,11 +2,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="20dp"
-    android:paddingLeft="20dp"
-    android:paddingRight="20dp"
-    android:paddingTop="220dp"
+    android:background="@drawable/remedic_res_bg"
     tools:context=".UploadingActivity">
+
+    <RelativeLayout
+        android:id="@+id/uploadingMessageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="20dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="220dp">
+
+
 
     <ProgressBar
         android:id="@+id/simpleProgressBar"
@@ -28,5 +36,54 @@
         android:padding="10dp"
 
         android:textColor="#000"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/healthDataLayout"
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="REPORTS"
+            android:textSize="15sp"
+            android:textColor="@color/colorPrimary"
+            android:background="@color/colorPrimaryLight"
+            android:gravity="center_horizontal"
+           >
+
+        </TextView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/bpm"
+            layout="@layout/heath_data_layout"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_margin="10dp"></include>
+
+        <include layout="@layout/heath_data_layout"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_margin="10dp"
+            android:id="@+id/spo2"></include>
+
+            <include layout="@layout/heath_data_layout"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_margin="10dp"
+                android:id="@+id/si"></include>
+
+
+    </LinearLayout>
+    </LinearLayout>
 
 </RelativeLayout>

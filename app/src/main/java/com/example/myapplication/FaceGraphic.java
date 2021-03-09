@@ -151,9 +151,9 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
                 drawShapesOnBitmap();
 
                 if(SingletonClass.getInstance().frameCount == 30){
-                   // SingletonClass.getInstance().isRecordingFinished = true;
+                    SingletonClass.getInstance().isRecordingFinished = true;
                 }
-               // if (overlayBitmap != null)
+               // if verlayBitmap != null)
                  //   MediaStore.Images.Media.insertImage(this.getApplicationContext().getContentResolver(), overlayBitmap, "CroppedFace", "FaceDetaction");
 
 
@@ -169,6 +169,8 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
             //REST api call and finish activity
         int size =    SingletonClass.getInstance().leftcheekFramMap.size();
             Log.v("Frame Count :: ", String.valueOf(SingletonClass.getInstance().frameCount));
+
+            getDataFromServer();
         }
 
 
@@ -357,8 +359,8 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
 //        }
 
        // if(SingletonClass.getInstance().frameCount == 30)
-        if(SingletonClass.getInstance().isRecordingFinished)
-        getDataFromServer(calculatedRGB ,leftCheekWidth,leftCheekHeight,SingletonClass.getInstance().frameCount);
+       // if(SingletonClass.getInstance().isRecordingFinished)
+       // getDataFromServer();
     }
 
 
@@ -387,21 +389,24 @@ public class FaceGraphic  extends GraphicOverlay.Graphic {
 
 
     }
-  void  getDataFromServer (int[] value_array,int width ,int height , int n_channels){
-   APIInterface   apiInterface = APIClient.getClient().create(APIInterface.class);
+
+    // void  getDataFromServer (int[] value_array,int width ,int height , int n_channels){
 
 
-      /**
-       GET List Resources
-       **/
-      Call<HealthData> call = apiInterface.getHealthData(value_array,width,height,n_channels);
+    void  getDataFromServer (){
+     APIInterface   apiInterface = APIClient.getClient().create(APIInterface.class);
 
+
+
+    //  Call<HealthData> call = apiInterface.getHealthData(value_array,width,height,n_channels);
+      Call<HealthData> call = apiInterface.getHealthData();
       call.enqueue(new Callback<HealthData>() {
           @Override
           public void onResponse(Call<HealthData> call, Response<HealthData> response) {
 
 
               Log.d("response TAG",response.code()+"");
+              SingletonClass.getInstance().restResponse = response;
 
           }
 
