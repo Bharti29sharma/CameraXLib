@@ -149,7 +149,7 @@ public final class MainActivity extends  AppCompatActivity implements
                     public void run() {
 
                         progressStatus = previousProgress;
-                        while (progressStatus < 6000) {
+                        while (progressStatus < 3000) {
                             progressStatus += 1;
                             // Update the progress bar and display the
                             //current value in the text view
@@ -157,7 +157,7 @@ public final class MainActivity extends  AppCompatActivity implements
                                 public void run() {
                                     if(recordingButton.getTag().equals("Play")) {
                                         previousProgress = progressStatus;
-                                        progressStatus = 6000;
+                                        progressStatus = 3000;
                                        // handler.removeCallbacks(null);
 
                                     }
@@ -175,7 +175,7 @@ public final class MainActivity extends  AppCompatActivity implements
                             });
                             try {
                                 // Sleep for 200 milliseconds.
-                                Thread.sleep(600);
+                                Thread.sleep(300);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }

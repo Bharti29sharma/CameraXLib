@@ -53,7 +53,7 @@ public class UploadingActivity extends AppCompatActivity {
                 //  progressBar.setVisibility(View.INVISIBLE);
                 uploadingMessageLayout.setVisibility(View.INVISIBLE);
                 healthDataLayout.setVisibility(View.VISIBLE);
-              Response<HealthData> response = SingletonClass.getInstance().restResponse;
+                Response<HealthData> response = SingletonClass.getInstance().restResponse;
                 TextView bpmValue = healthDataLayout.findViewById(R.id.bpm).findViewById(R.id.data_value);
                 TextView so2Value = healthDataLayout.findViewById(R.id.spo2).findViewById(R.id.data_value);
                 TextView siValue = healthDataLayout.findViewById(R.id.si).findViewById(R.id.data_value);

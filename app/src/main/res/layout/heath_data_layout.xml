@@ -31,14 +31,16 @@
         android:orientation="vertical"
         android:layout_margin="10dp"
         android:padding="10dp">
+
         <TextView
             android:id="@+id/data_value"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="70dp"
             android:gravity="center_horizontal"
-            android:padding="10dp"
+            android:padding="5dp"
             android:textColor="#000"
             android:textSize="35sp"
+            android:text="65"
             android:textStyle="bold" />
 
         <TextView
@@ -47,6 +49,7 @@
             android:layout_height="48dp"
             android:gravity="center_horizontal"
             android:text="Heart Rate"
+            android:padding="5dp"
             android:textColor="#000"
             android:textSize="14sp" />
     </LinearLayout>
