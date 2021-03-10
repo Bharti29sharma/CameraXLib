@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="160dp"
     android:layout_alignParentTop="true"
-    android:elevation="10dp"
+    android:elevation="20dp"
     android:background="@drawable/shadowrect"
     android:textAlignment="center"
     xmlns:android="http://schemas.android.com/apk/res/android">
@@ -48,8 +48,8 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:gravity="center_horizontal"
-            android:text="Heart Rate"
             android:padding="5dp"
+            android:text="Heart Rate"
             android:textColor="#000"
             android:textSize="14sp" />
     </LinearLayout>
