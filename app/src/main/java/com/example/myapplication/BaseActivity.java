@@ -1,7 +1,6 @@
 package com.example.myapplication;
 
 import android.os.Bundle;
-import android.text.Html;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,17 +42,19 @@ public class BaseActivity extends AppCompatActivity {
 
         DrawerItems[] drawerItem = new DrawerItems[2];
 
-        drawerItem[0] = new DrawerItems(R.drawable.remedic_mini, "Home");
-        drawerItem[1] = new DrawerItems(R.drawable.remedic_mini, "Settings");
+        drawerItem[0] = new DrawerItems(R.drawable.ic_baseline_home_24, "Home");
+        drawerItem[1] = new DrawerItems(R.drawable.ic_baseline_settings_24, "Settings");
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setLogo(R.drawable.remedic_mini);
+        getSupportActionBar().setIcon(R.drawable.remedic_mini_40);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
+        getSupportActionBar().setTitle("REMEDIC");
+
 
         String centerNBlack = "<div style='text-align:center' ><span style='color:grey' >REMEDIC</span></div>";
-        getSupportActionBar().setTitle(Html.fromHtml(centerNBlack));
+       // getSupportActionBar().setTitle(Html.fromHtml(centerNBlack));
 
         DrawerItemCustomAdapter adapter = new DrawerItemCustomAdapter(this, R.layout.list_view_item, drawerItem);
         mDrawerList.setAdapter(adapter);

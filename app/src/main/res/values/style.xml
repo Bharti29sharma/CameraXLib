@@ -1,13 +1,5 @@
 <resources>
-    <style name="MyActionBarTheme" parent="Widget.AppCompat.ActionBar">
-        <item name="contentInsetStart">50dp</item>
-        <item name="contentInsetEnd">50dp</item>
-    </style>
-    <style name="myActionButtonStyle" parent="Widget.AppCompat.ActionButton">
-        <item name="android:minWidth">30dp</item>
-        <item name="android:maxWidth">48dp</item>
-        <item name="android:width">38dp</item>
-    </style>
+
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
@@ -15,9 +7,7 @@
         <item name="colorPrimaryDark">@color/colorPrimary</item>
         <item name="android:statusBarColor">@color/colorPrimary</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:actionBarStyle">@style/MyActionBarTheme</item>
-        <item name="android:actionButtonStyle">@style/myActionButtonStyle</item>
-        <item name="actionButtonStyle">@style/myActionButtonStyle</item>
+
     </style>
 
 <!--    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">-->
