@@ -11,6 +11,7 @@ import android.media.ImageReader;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.text.Html;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -27,6 +28,7 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Switch;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -104,13 +106,8 @@ public class HomeFragment extends Fragment {
         ProgressBar progressBar = rootView.findViewById(R.id.progressBar);
 
 
-//        getSupportActionBar().setDisplayShowHomeEnabled(true);
-//        getSupportActionBar().setLogo(R.drawable.remedic_mini_wo_bg);
-//        getSupportActionBar().setDisplayUseLogoEnabled(true);
-//        getSupportActionBar().setDisplayShowTitleEnabled(true);
-
-//        String centerNBlack = "<div style='text-align:center' ><span style='color:black' >REMEDIC</span></div>";
-//        getSupportActionBar().setTitle(Html.fromHtml(centerNBlack));
+       String centerNBlack = "<div style='text-align:center' ><span style='color:grey' >  REMEDIC  </span></div>";
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(Html.fromHtml(centerNBlack));
 
 
         recordingButton.setOnClickListener(new View.OnClickListener() {

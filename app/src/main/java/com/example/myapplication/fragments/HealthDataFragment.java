@@ -2,6 +2,7 @@ package com.example.myapplication.fragments;
 
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -38,12 +40,8 @@ public class HealthDataFragment extends Fragment {
 
         uploadingMessageLayout.setVisibility(View.VISIBLE);
         healthDataLayout.setVisibility(View.INVISIBLE);
-//
-//        getSupportActionBar().setDisplayShowHomeEnabled(true);
-//        getSupportActionBar().setLogo(R.drawable.remedic_mini_wo_bg);
-//        getSupportActionBar().setDisplayUseLogoEnabled(true);
-//        getSupportActionBar().setDisplayShowTitleEnabled(true);
-//        getSupportActionBar().setTitle(Html.fromHtml("<font color='#0000'>REMEDIC </font>"));
+
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(Html.fromHtml("<font color='#696969'> REMEDIC </font>"));
 
         new CountDownTimer(6000, 200) {
             @Override
