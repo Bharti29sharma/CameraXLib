@@ -1,4 +1,5 @@
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -28,6 +29,52 @@
 
     </LinearLayout>
 
+
+
+
+
+<!--    <LinearLayout-->
+<!--        android:layout_width="200dp"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:id="@+id/leftView"-->
+<!--        android:orientation="vertical"-->
+<!--        android:background="#3479ea"-->
+<!--        android:padding="5dp"-->
+<!--        android:clickable="true">-->
+<!--        &lt;!&ndash; User layout&ndash;&gt;-->
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:id="@+id/userLayout"-->
+<!--            android:orientation="horizontal"-->
+<!--            android:gravity="center_vertical">-->
+<!--            <ImageView-->
+<!--                android:layout_width="40dp"-->
+<!--                android:layout_height="40dp"-->
+<!--                android:id="@+id/avatarImageView"-->
+<!--                android:src="@drawable/remedic_mini"/>-->
+<!--            <TextView-->
+<!--                android:id="@+id/textView"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_weight="1"-->
+<!--                android:textSize="18sp"-->
+<!--                android:textColor="#ffffff"-->
+<!--                tools:text="Name"-->
+<!--                android:layout_marginLeft="10dp"/>-->
+
+<!--        </LinearLayout>-->
+<!--        <ListView-->
+<!--            android:id="@+id/left_drawer"-->
+<!--            android:layout_width="240dp"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_gravity="start"-->
+<!--            android:background="#FFFFFF"-->
+<!--            android:choiceMode="singleChoice"-->
+<!--            android:divider="@android:color/darker_gray"-->
+<!--            android:dividerHeight="1dp" />-->
+<!--    </LinearLayout>-->
+
     <ListView
         android:id="@+id/left_drawer"
         android:layout_width="240dp"
@@ -37,5 +84,6 @@
         android:choiceMode="singleChoice"
         android:divider="@android:color/darker_gray"
         android:dividerHeight="1dp" />
+
 
 </androidx.drawerlayout.widget.DrawerLayout>

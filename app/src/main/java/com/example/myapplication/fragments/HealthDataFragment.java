@@ -13,6 +13,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.myapplication.R;
 import com.example.myapplication.SingletonClass;
@@ -21,7 +23,7 @@ import com.example.myapplication.model.HealthData;
 import retrofit2.Response;
 
 public class HealthDataFragment extends Fragment {
-
+    NavController navController;
 
     public HealthDataFragment() {
     }
@@ -97,6 +99,23 @@ public class HealthDataFragment extends Fragment {
         }.start();
 
         return rootView;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+
+    @Override
+    public void onDestroy() {
+        NavHostFragment.findNavController(getParentFragment()).navigate(R.id.nav_home);
+        super.onDestroy();
     }
 }
 

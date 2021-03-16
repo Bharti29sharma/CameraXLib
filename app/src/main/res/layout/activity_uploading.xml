@@ -68,18 +68,18 @@
             android:id="@+id/bpm"
             layout="@layout/heath_data_layout"
             android:layout_width="match_parent"
-            android:layout_height="170dp"
+            android:layout_height="wrap_content"
             android:layout_margin="10dp"></include>
 
         <include layout="@layout/heath_data_layout"
             android:layout_width="match_parent"
-            android:layout_height="170dp"
+            android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:id="@+id/spo2"></include>
 
             <include layout="@layout/heath_data_layout"
                 android:layout_width="match_parent"
-                android:layout_height="170dp"
+                android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:id="@+id/si"></include>
 

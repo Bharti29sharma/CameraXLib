@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +25,7 @@ public class BaseActivity extends AppCompatActivity {
     private String[] mNavigationDrawerItemTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
+  //  private LinearLayout mLeftView;
     Toolbar toolbar;
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
@@ -37,6 +39,7 @@ public class BaseActivity extends AppCompatActivity {
         mNavigationDrawerItemTitles= getResources().getStringArray(R.array.navigation_drawer_items_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
+       // mLeftView = (LinearLayout) findViewById(R.id.leftView);
 
         setupToolbar();
 
@@ -50,11 +53,11 @@ public class BaseActivity extends AppCompatActivity {
         getSupportActionBar().setIcon(R.drawable.remedic_mini_40);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
-        getSupportActionBar().setTitle("REMEDIC");
+      //  getSupportActionBar().setTitle("REMEDIC");
 
 
         String centerNBlack = "<div style='text-align:center' ><span style='color:grey' >REMEDIC</span></div>";
-       // getSupportActionBar().setTitle(Html.fromHtml(centerNBlack));
+        getSupportActionBar().setTitle(Html.fromHtml(centerNBlack));
 
         DrawerItemCustomAdapter adapter = new DrawerItemCustomAdapter(this, R.layout.list_view_item, drawerItem);
         mDrawerList.setAdapter(adapter);

@@ -7,8 +7,7 @@
     android:layout_height="wrap_content"
     android:minHeight="?attr/actionBarSize"
     android:background="?attr/colorPrimary"
-    app:contentInsetLeft="0dp"
-    app:contentInsetStart="0dp"
-    local:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    app:titleTextColor="@color/colorGrey"
+
     local:popupTheme="@style/ThemeOverlay.AppCompat.Light"
     app:ignore="NamespaceTypo" />

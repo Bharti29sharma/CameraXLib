@@ -30,7 +30,7 @@ import android.widget.Switch;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.myapplication.CameraSource;
 import com.example.myapplication.CameraSourcePreview;
@@ -55,6 +55,7 @@ public class HomeFragment extends Fragment {
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 
     private String cameraId;
+
     protected CameraDevice cameraDevice;
     protected CameraCaptureSession cameraCaptureSessions;
     protected CaptureRequest captureRequest;
@@ -86,6 +87,7 @@ public class HomeFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.activity_main, container, false);
         setHasOptionsMenu(true);
+
 
         preview = rootView.findViewById(R.id.preview_view);
         if (preview == null) {
@@ -169,8 +171,9 @@ public class HomeFragment extends Fragment {
                                                 SingletonClass.getInstance().isRecordingFinished = true;
                                               Fragment  fragment = new HealthDataFragment();
                                                 if (fragment != null) {
-                                                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                                                    NavHostFragment.findNavController(getParentFragment()).navigate(R.id.nav_health_data);
+                                                                                                      //FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                                    //fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 
 //                                                    mDrawerList.setItemChecked(position, true);
 //                                                    mDrawerList.setSelection(position);
@@ -240,6 +243,7 @@ return rootView;
                         Log.d(TAG, "resume: graphOverlay is null");
                     }
                     preview.start(cameraSource, graphicOverlay);
+
                 } catch (IOException e) {
                     Log.e(TAG, "Unable to start camera source.", e);
                     cameraSource.release();
